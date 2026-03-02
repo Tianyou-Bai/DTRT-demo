@@ -3,23 +3,45 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MV-MATH Demo - Interactive Math Reasoning</title>
-    <!-- 沿用论文网页的样式，保持视觉统一 -->
+    <title>Engineering Diagram Parser - Scene Graph Demo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 保持和论文网页一致的风格 */
         .demo-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 0 1rem;
         }
-        .result-area {
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        .result-section {
+            display: none;
             margin-top: 2rem;
-            padding: 1.5rem;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .image-card {
             border: 1px solid #ddd;
             border-radius: 8px;
-            display: none;
+            padding: 1rem;
+        }
+        .image-card img {
+            border-radius: 4px;
+            margin-bottom: 1rem;
         }
         .example-btn {
             margin: 0.5rem 0.25rem;
@@ -29,148 +51,172 @@
 <body>
     <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://eternal8080.github.io/MV-MATH.github.io/">
-                <span class="icon"><i class="fas fa-book"></i></span>
-                <span>MV-MATH Paper</span>
+            <a class="navbar-item" href="https://你的用户名.github.io/你的论文仓库名/">
+                <span class="icon"><i class="fas fa-drafting-compass"></i></span>
+                <span>Engineering Diagram Scene Graph Demo</span>
             </a>
         </div>
     </nav>
 
     <div class="demo-container">
-        <h1 class="title is-2 has-text-centered">MV-MATH Interactive Demo</h1>
-        <p class="subtitle is-4 has-text-centered">Try Multi-Visual Math Reasoning Model</p>
+        <h1 class="title is-2 has-text-centered">Engineering Diagram Parser & Scene Graph Generator</h1>
+        <p class="subtitle is-4 has-text-centered">Upload an engineering diagram to parse and generate a hyper-relational scene graph</p>
 
-        <!-- 交互区域 -->
+        <!-- 上传区域 -->
         <div class="box">
+            <!-- 手动上传按钮 -->
             <div class="field">
-                <label class="label">Input Math Question (with multi-visual context)</label>
+                <label class="label">Upload Engineering Diagram</label>
                 <div class="control">
-                    <textarea class="textarea is-large" id="question-input" placeholder="Paste your math question here (e.g., A geometry problem with 2 images about triangle area calculation)..."></textarea>
+                    <input type="file" id="file-upload" accept="image/png, image/jpg, image/jpeg" style="display: none;">
+                    <div class="upload-area" id="upload-area">
+                        <span class="icon is-large"><i class="fas fa-cloud-upload-alt fa-3x"></i></span>
+                        <p class="mt-3">Click to select or drag & drop an engineering diagram (PNG/JPG)</p>
+                        <p class="help">Supported formats: PNG, JPG, JPEG</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- 示例按钮 -->
+            <!-- 示例按钮（快速加载样例） -->
             <div class="field">
                 <p class="label">Quick Examples:</p>
                 <div class="control">
-                    <button class="button is-primary is-light example-btn" data-example="1">Example 1 (Geometry)</button>
-                    <button class="button is-primary is-light example-btn" data-example="2">Example 2 (Algebra)</button>
-                    <button class="button is-primary is-light example-btn" data-example="3">Example 3 (Statistics)</button>
+                    <button class="button is-primary is-light example-btn" data-example="1">Example 1 (Mechanical Diagram)</button>
+                    <button class="button is-primary is-light example-btn" data-example="2">Example 2 (Electrical Diagram)</button>
                 </div>
             </div>
 
-            <!-- 提交按钮 -->
+            <!-- 解析按钮 -->
             <div class="field">
                 <div class="control">
-                    <button class="button is-primary is-fullwidth" id="submit-btn">
+                    <button class="button is-primary is-fullwidth" id="parse-btn" disabled>
                         <span class="icon"><i class="fas fa-cogs"></i></span>
-                        <span>Run Model Inference</span>
+                        <span>Parsing & Generate Scene Graph</span>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- 结果展示区 -->
-        <div class="result-area" id="result-area">
-            <h3 class="title is-4">Model Output</h3>
-            <div class="content" id="model-answer">
-                <!-- 模型结果会在这里显示 -->
+        <div class="result-section" id="result-section">
+            <h3 class="title is-4">Result Comparison</h3>
+            <div class="image-grid">
+                <!-- 原始图纸 -->
+                <div class="image-card has-text-centered">
+                    <h4 class="subtitle is-5">Original Engineering Diagram</h4>
+                    <img id="original-image" src="" alt="Original Diagram" width="100%">
+                </div>
+                <!-- 生成的场景图 -->
+                <div class="image-card has-text-centered">
+                    <h4 class="subtitle is-5">Generated Scene Graph</h4>
+                    <img id="scene-graph-image" src="" alt="Scene Graph" width="100%">
+                </div>
             </div>
-            <hr>
-            <h3 class="title is-4">Reasoning Steps</h3>
-            <div class="content" id="reasoning-steps">
-                <!-- 推理步骤会在这里显示 -->
-            </div>
-            <hr>
-            <h3 class="title is-4">Model Metrics</h3>
-            <div class="content" id="model-metrics">
-                <!-- 指标会在这里显示 -->
+
+            <!-- 解析详情 -->
+            <div class="box">
+                <h3 class="title is-5">Parsing Details</h3>
+                <div class="content" id="parse-details">
+                    <!-- 解析详情会在这里显示 -->
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 示例数据（模拟模型结果）
+        // 示例数据（替换为你的论文样例路径和解析结果）
         const examples = {
             1: {
-                question: "Calculate the area of triangle ABC with base 8cm (shown in Image 1) and height 5cm (shown in Image 2).",
-                answer: "The area of triangle ABC is 20 cm².",
-                steps: [
-                    "Step 1: Recall the formula for the area of a triangle: Area = (base × height) / 2",
-                    "Step 2: Substitute the given values: base = 8cm, height = 5cm",
-                    "Step 3: Calculate: (8 × 5) / 2 = 40 / 2 = 20",
-                    "Step 4: Final result: 20 cm²"
-                ],
-                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
+                original: "static/images/engineering_diagram_1.png", // 你的示例图纸1路径
+                sceneGraph: "static/images/scene_graph_1.png",       // 对应的场景图1路径
+                details: `
+                    <p><b>Diagram Type:</b> Mechanical Engineering Drawing</p>
+                    <p><b>Key Elements Parsed:</b> Bolt (×5), Nut (×5), Shaft (×1), Bearing (×2)</p>
+                    <p><b>Relations Extracted:</b> Bolt → Fastens → Shaft; Bearing → Supports → Shaft</p>
+                    <p><b>Scene Graph Nodes:</b> 8 nodes, 7 edges (hyper-relational links)</p>
+                `
             },
             2: {
-                question: "Solve the equation 2x + 5 = 15 (with a number line shown in Image 1).",
-                answer: "x = 5",
-                steps: [
-                    "Step 1: Subtract 5 from both sides: 2x = 15 - 5",
-                    "Step 2: Simplify: 2x = 10",
-                    "Step 3: Divide both sides by 2: x = 10 / 2",
-                    "Step 4: Final result: x = 5"
-                ],
-                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
-            },
-            3: {
-                question: "Calculate the mean of the data set [2, 4, 6, 8] (with a bar chart shown in Image 1).",
-                answer: "The mean is 5.",
-                steps: [
-                    "Step 1: Sum the data points: 2 + 4 + 6 + 8 = 20",
-                    "Step 2: Count the number of data points: 4",
-                    "Step 3: Calculate mean: 20 / 4 = 5",
-                    "Step 4: Final result: 5"
-                ],
-                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
+                original: "static/images/engineering_diagram_2.png", // 你的示例图纸2路径
+                sceneGraph: "static/images/scene_graph_2.png",       // 对应的场景图2路径
+                details: `
+                    <p><b>Diagram Type:</b> Electrical Circuit Diagram</p>
+                    <p><b>Key Elements Parsed:</b> Resistor (×3), Capacitor (×2), Transistor (×1), Power Source (×1)</p>
+                    <p><b>Relations Extracted:</b> Power → Supplies → Resistor; Capacitor → Parallel With → Resistor</p>
+                    <p><b>Scene Graph Nodes:</b> 7 nodes, 6 edges (hyper-relational links)</p>
+                `
             }
         };
 
-        // 绑定示例按钮事件
+        // 上传区域逻辑
+        const uploadArea = document.getElementById('upload-area');
+        const fileUpload = document.getElementById('file-upload');
+        const parseBtn = document.getElementById('parse-btn');
+        let selectedExample = null;
+
+        // 点击上传区域触发文件选择
+        uploadArea.addEventListener('click', () => fileUpload.click());
+        // 拖放上传（可选增强）
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = "#007bff";
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = "#ccc";
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = "#ccc";
+            if (e.dataTransfer.files.length > 0) {
+                fileUpload.files = e.dataTransfer.files;
+                handleFileSelection();
+            }
+        });
+        // 文件选择后启用按钮
+        fileUpload.addEventListener('change', handleFileSelection);
+
+        // 处理文件选择
+        function handleFileSelection() {
+            if (fileUpload.files.length > 0 || selectedExample) {
+                parseBtn.disabled = false;
+            }
+        }
+
+        // 示例按钮逻辑
         document.querySelectorAll('.example-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const exampleId = this.dataset.example;
-                const example = examples[exampleId];
-                document.getElementById('question-input').value = example.question;
+                selectedExample = examples[exampleId];
+                // 显示示例图纸（预览）
+                document.getElementById('original-image').src = selectedExample.original;
+                parseBtn.disabled = false;
             });
         });
 
-        // 绑定提交按钮事件
-        document.getElementById('submit-btn').addEventListener('click', function() {
-            const input = document.getElementById('question-input').value.trim();
-            if (!input) {
-                alert("Please enter a question or select an example!");
-                return;
-            }
-
-            // 模拟模型加载
-            this.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Processing...</span>';
+        // 解析按钮逻辑
+        parseBtn.addEventListener('click', function() {
+            // 禁用按钮+加载动画
+            this.disabled = true;
+            this.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Parsing Diagram... (≈3s)</span>';
             
-            // 延迟模拟模型推理
+            // 模拟模型解析过程（延迟3秒）
             setTimeout(() => {
                 // 恢复按钮状态
-                this.innerHTML = '<span class="icon"><i class="fas fa-cogs"></i></span><span>Run Model Inference</span>';
-                
-                // 显示结果（匹配示例或用默认结果）
-                let result = examples[1]; // 默认示例1
-                Object.values(examples).forEach(example => {
-                    if (input.includes(example.question.substring(0, 20))) {
-                        result = example;
-                    }
-                });
-
-                // 渲染结果
-                document.getElementById('model-answer').textContent = result.answer;
-                document.getElementById('reasoning-steps').innerHTML = result.steps.map(step => `<p>${step}</p>`).join('');
-                document.getElementById('model-metrics').textContent = result.metrics;
+                this.innerHTML = '<span class="icon"><i class="fas fa-cogs"></i></span><span>Parsing & Generate Scene Graph</span>';
+                this.disabled = false;
                 
                 // 显示结果区域
-                document.getElementById('result-area').style.display = 'block';
+                document.getElementById('result-section').style.display = 'block';
+                
+                // 渲染结果（如果是示例，用示例数据；如果是上传文件，用默认示例1）
+                const result = selectedExample || examples[1];
+                document.getElementById('original-image').src = result.original;
+                document.getElementById('scene-graph-image').src = result.sceneGraph;
+                document.getElementById('parse-details').innerHTML = result.details;
                 
                 // 滚动到结果区域
-                document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
-            }, 1500);
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+            }, 3000);
         });
     </script>
 </body>

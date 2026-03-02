@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MV-MATH Demo - Interactive Math Reasoning</title>
+    <!-- 沿用论文网页的样式，保持视觉统一 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 保持和论文网页一致的风格 */
+        .demo-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .result-area {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: none;
+        }
+        .example-btn {
+            margin: 0.5rem 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://eternal8080.github.io/MV-MATH.github.io/">
+                <span class="icon"><i class="fas fa-book"></i></span>
+                <span>MV-MATH Paper</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="demo-container">
+        <h1 class="title is-2 has-text-centered">MV-MATH Interactive Demo</h1>
+        <p class="subtitle is-4 has-text-centered">Try Multi-Visual Math Reasoning Model</p>
+
+        <!-- 交互区域 -->
+        <div class="box">
+            <div class="field">
+                <label class="label">Input Math Question (with multi-visual context)</label>
+                <div class="control">
+                    <textarea class="textarea is-large" id="question-input" placeholder="Paste your math question here (e.g., A geometry problem with 2 images about triangle area calculation)..."></textarea>
+                </div>
+            </div>
+
+            <!-- 示例按钮 -->
+            <div class="field">
+                <p class="label">Quick Examples:</p>
+                <div class="control">
+                    <button class="button is-primary is-light example-btn" data-example="1">Example 1 (Geometry)</button>
+                    <button class="button is-primary is-light example-btn" data-example="2">Example 2 (Algebra)</button>
+                    <button class="button is-primary is-light example-btn" data-example="3">Example 3 (Statistics)</button>
+                </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary is-fullwidth" id="submit-btn">
+                        <span class="icon"><i class="fas fa-cogs"></i></span>
+                        <span>Run Model Inference</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果展示区 -->
+        <div class="result-area" id="result-area">
+            <h3 class="title is-4">Model Output</h3>
+            <div class="content" id="model-answer">
+                <!-- 模型结果会在这里显示 -->
+            </div>
+            <hr>
+            <h3 class="title is-4">Reasoning Steps</h3>
+            <div class="content" id="reasoning-steps">
+                <!-- 推理步骤会在这里显示 -->
+            </div>
+            <hr>
+            <h3 class="title is-4">Model Metrics</h3>
+            <div class="content" id="model-metrics">
+                <!-- 指标会在这里显示 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 示例数据（模拟模型结果）
+        const examples = {
+            1: {
+                question: "Calculate the area of triangle ABC with base 8cm (shown in Image 1) and height 5cm (shown in Image 2).",
+                answer: "The area of triangle ABC is 20 cm².",
+                steps: [
+                    "Step 1: Recall the formula for the area of a triangle: Area = (base × height) / 2",
+                    "Step 2: Substitute the given values: base = 8cm, height = 5cm",
+                    "Step 3: Calculate: (8 × 5) / 2 = 40 / 2 = 20",
+                    "Step 4: Final result: 20 cm²"
+                ],
+                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
+            },
+            2: {
+                question: "Solve the equation 2x + 5 = 15 (with a number line shown in Image 1).",
+                answer: "x = 5",
+                steps: [
+                    "Step 1: Subtract 5 from both sides: 2x = 15 - 5",
+                    "Step 2: Simplify: 2x = 10",
+                    "Step 3: Divide both sides by 2: x = 10 / 2",
+                    "Step 4: Final result: x = 5"
+                ],
+                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
+            },
+            3: {
+                question: "Calculate the mean of the data set [2, 4, 6, 8] (with a bar chart shown in Image 1).",
+                answer: "The mean is 5.",
+                steps: [
+                    "Step 1: Sum the data points: 2 + 4 + 6 + 8 = 20",
+                    "Step 2: Count the number of data points: 4",
+                    "Step 3: Calculate mean: 20 / 4 = 5",
+                    "Step 4: Final result: 5"
+                ],
+                metrics: "SAR (Step Accuracy Rate): 100%, QCR (Question Completeness Rate): 100%"
+            }
+        };
+
+        // 绑定示例按钮事件
+        document.querySelectorAll('.example-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const exampleId = this.dataset.example;
+                const example = examples[exampleId];
+                document.getElementById('question-input').value = example.question;
+            });
+        });
+
+        // 绑定提交按钮事件
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            const input = document.getElementById('question-input').value.trim();
+            if (!input) {
+                alert("Please enter a question or select an example!");
+                return;
+            }
+
+            // 模拟模型加载
+            this.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Processing...</span>';
+            
+            // 延迟模拟模型推理
+            setTimeout(() => {
+                // 恢复按钮状态
+                this.innerHTML = '<span class="icon"><i class="fas fa-cogs"></i></span><span>Run Model Inference</span>';
+                
+                // 显示结果（匹配示例或用默认结果）
+                let result = examples[1]; // 默认示例1
+                Object.values(examples).forEach(example => {
+                    if (input.includes(example.question.substring(0, 20))) {
+                        result = example;
+                    }
+                });
+
+                // 渲染结果
+                document.getElementById('model-answer').textContent = result.answer;
+                document.getElementById('reasoning-steps').innerHTML = result.steps.map(step => `<p>${step}</p>`).join('');
+                document.getElementById('model-metrics').textContent = result.metrics;
+                
+                // 显示结果区域
+                document.getElementById('result-area').style.display = 'block';
+                
+                // 滚动到结果区域
+                document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

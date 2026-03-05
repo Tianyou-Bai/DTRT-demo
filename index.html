@@ -1,223 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Engineering Diagram Parser - Scene Graph Demo</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <title>PID Image Visualization Demo</title>
     <style>
-        .demo-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .upload-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 4rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            transition: border-color 0.3s;
-        }
-        .upload-area:hover {
-            border-color: #007bff;
-        }
-        .result-section {
-            display: none;
-            margin-top: 2rem;
-        }
-        .image-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        .image-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .image-card img {
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-        .example-btn {
-            margin: 0.5rem 0.25rem;
-        }
+        body {max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial;}
+        .demo-section {margin: 30px 0;}
+        .img-container {display: flex; gap: 20px; flex-wrap: wrap;}
+        .img-card {width: 45%; min-width: 300px;}
+        .img-card img {width: 100%; border: 1px solid #ddd; padding: 5px;}
+        code {background: #f5f5f5; padding: 2px 6px; border-radius: 3px;}
+        pre {background: #f5f5f5; padding: 15px; overflow-x: auto; border-radius: 5px;}
     </style>
 </head>
 <body>
-    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="https://你的用户名.github.io/你的论文仓库名/">
-                <span class="icon"><i class="fas fa-drafting-compass"></i></span>
-                <span>Engineering Diagram Scene Graph Demo</span>
-            </a>
-        </div>
-    </nav>
+    <h1>PID 图像可视化 Demo</h1>
+    
+    <div class="demo-section">
+        <h2>功能介绍</h2>
+        <p>基于 pHash 匹配图像，解析 GraphML 中的节点/边信息，可视化标注（OCR 文本/符号 bounding box + 关联边）。</p>
+    </div>
 
-    <div class="demo-container">
-        <h1 class="title is-2 has-text-centered">Engineering Diagram Parser & Scene Graph Generator</h1>
-        <p class="subtitle is-4 has-text-centered">Upload an engineering diagram to parse and generate a hyper-relational scene graph</p>
-
-        <!-- 上传区域 -->
-        <div class="box">
-            <!-- 手动上传按钮 -->
-            <div class="field">
-                <label class="label">Upload Engineering Diagram</label>
-                <div class="control">
-                    <input type="file" id="file-upload" accept="image/png, image/jpg, image/jpeg" style="display: none;">
-                    <div class="upload-area" id="upload-area">
-                        <span class="icon is-large"><i class="fas fa-cloud-upload-alt fa-3x"></i></span>
-                        <p class="mt-3">Click to select or drag & drop an engineering diagram (PNG/JPG)</p>
-                        <p class="help">Supported formats: PNG, JPG, JPEG</p>
-                    </div>
-                </div>
+    <div class="demo-section">
+        <h2>示例效果</h2>
+        <div class="img-container">
+            <div class="img-card">
+                <h3>原始图像</h3>
+                <img src="examples/raw_image.jpg" alt="Raw Image">
             </div>
-
-            <!-- 示例按钮（快速加载样例） -->
-            <div class="field">
-                <p class="label">Quick Examples:</p>
-                <div class="control">
-                    <button class="button is-primary is-light example-btn" data-example="1">Example 1 (Mechanical Diagram)</button>
-                    <button class="button is-primary is-light example-btn" data-example="2">Example 2 (Electrical Diagram)</button>
-                </div>
-            </div>
-
-            <!-- 解析按钮 -->
-            <div class="field">
-                <div class="control">
-                    <button class="button is-primary is-fullwidth" id="parse-btn" disabled>
-                        <span class="icon"><i class="fas fa-cogs"></i></span>
-                        <span>Parsing & Generate Scene Graph</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 结果展示区 -->
-        <div class="result-section" id="result-section">
-            <h3 class="title is-4">Result Comparison</h3>
-            <div class="image-grid">
-                <!-- 原始图纸 -->
-                <div class="image-card has-text-centered">
-                    <h4 class="subtitle is-5">Original Engineering Diagram</h4>
-                    <img id="original-image" src="" alt="Original Diagram" width="100%">
-                </div>
-                <!-- 生成的场景图 -->
-                <div class="image-card has-text-centered">
-                    <h4 class="subtitle is-5">Generated Scene Graph</h4>
-                    <img id="scene-graph-image" src="" alt="Scene Graph" width="100%">
-                </div>
-            </div>
-
-            <!-- 解析详情 -->
-            <div class="box">
-                <h3 class="title is-5">Parsing Details</h3>
-                <div class="content" id="parse-details">
-                    <!-- 解析详情会在这里显示 -->
-                </div>
+            <div class="img-card">
+                <h3>可视化后图像</h3>
+                <img src="examples/visualized_image.jpg" alt="Visualized Image">
             </div>
         </div>
     </div>
 
-    <script>
-        // 示例数据（替换为你的论文样例路径和解析结果）
-        const examples = {
-            1: {
-                original: "static/images/engineering_diagram_1.png", // 你的示例图纸1路径
-                sceneGraph: "static/images/scene_graph_1.png",       // 对应的场景图1路径
-                details: `
-                    <p><b>Diagram Type:</b> Mechanical Engineering Drawing</p>
-                    <p><b>Key Elements Parsed:</b> Bolt (×5), Nut (×5), Shaft (×1), Bearing (×2)</p>
-                    <p><b>Relations Extracted:</b> Bolt → Fastens → Shaft; Bearing → Supports → Shaft</p>
-                    <p><b>Scene Graph Nodes:</b> 8 nodes, 7 edges (hyper-relational links)</p>
-                `
-            },
-            2: {
-                original: "static/images/engineering_diagram_2.png", // 你的示例图纸2路径
-                sceneGraph: "static/images/scene_graph_2.png",       // 对应的场景图2路径
-                details: `
-                    <p><b>Diagram Type:</b> Electrical Circuit Diagram</p>
-                    <p><b>Key Elements Parsed:</b> Resistor (×3), Capacitor (×2), Transistor (×1), Power Source (×1)</p>
-                    <p><b>Relations Extracted:</b> Power → Supplies → Resistor; Capacitor → Parallel With → Resistor</p>
-                    <p><b>Scene Graph Nodes:</b> 7 nodes, 6 edges (hyper-relational links)</p>
-                `
-            }
-        };
+    <div class="demo-section">
+        <h2>核心代码片段</h2>
+        <h3>1. pHash 计算</h3>
+        <pre><code>def calculate_phash(image_path):
+    try:
+        img = Image.open(image_path)
+        img = img.convert("L").resize((8, 8), Image.Resampling.LANCZOS)
+        pixels = list(img.getdata())
+        avg = sum(pixels) / len(pixels)
+        bits = "".join(["1" if pixel > avg else "0" for pixel in pixels])
+        return int(bits, 2)
+    except Exception as e:
+        print(f"Error calculating pHash for {image_path}: {e}")
+        return None</code></pre>
+        <h3>2. 可视化绘制</h3>
+        <pre><code>def draw_visualization(img_path, nodes, edges, output_path, perturb_bbox_max=0):
+    img = cv2.imread(img_path)
+    # ... 绘制节点/边/文本的逻辑 ...
+    cv2.imwrite(output_path, img)</code></pre>
+    </div>
 
-        // 上传区域逻辑
-        const uploadArea = document.getElementById('upload-area');
-        const fileUpload = document.getElementById('file-upload');
-        const parseBtn = document.getElementById('parse-btn');
-        let selectedExample = null;
-
-        // 点击上传区域触发文件选择
-        uploadArea.addEventListener('click', () => fileUpload.click());
-        // 拖放上传（可选增强）
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = "#007bff";
-        });
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = "#ccc";
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = "#ccc";
-            if (e.dataTransfer.files.length > 0) {
-                fileUpload.files = e.dataTransfer.files;
-                handleFileSelection();
-            }
-        });
-        // 文件选择后启用按钮
-        fileUpload.addEventListener('change', handleFileSelection);
-
-        // 处理文件选择
-        function handleFileSelection() {
-            if (fileUpload.files.length > 0 || selectedExample) {
-                parseBtn.disabled = false;
-            }
-        }
-
-        // 示例按钮逻辑
-        document.querySelectorAll('.example-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const exampleId = this.dataset.example;
-                selectedExample = examples[exampleId];
-                // 显示示例图纸（预览）
-                document.getElementById('original-image').src = selectedExample.original;
-                parseBtn.disabled = false;
-            });
-        });
-
-        // 解析按钮逻辑
-        parseBtn.addEventListener('click', function() {
-            // 禁用按钮+加载动画
-            this.disabled = true;
-            this.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Parsing Diagram... (≈3s)</span>';
-            
-            // 模拟模型解析过程（延迟3秒）
-            setTimeout(() => {
-                // 恢复按钮状态
-                this.innerHTML = '<span class="icon"><i class="fas fa-cogs"></i></span><span>Parsing & Generate Scene Graph</span>';
-                this.disabled = false;
-                
-                // 显示结果区域
-                document.getElementById('result-section').style.display = 'block';
-                
-                // 渲染结果（如果是示例，用示例数据；如果是上传文件，用默认示例1）
-                const result = selectedExample || examples[1];
-                document.getElementById('original-image').src = result.original;
-                document.getElementById('scene-graph-image').src = result.sceneGraph;
-                document.getElementById('parse-details').innerHTML = result.details;
-                
-                // 滚动到结果区域
-                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
-            }, 3000);
-        });
-    </script>
+    <div class="demo-section">
+        <h2>使用说明</h2>
+        <p>1. 运行 <code>python find_and_visualize.py [目标图片路径] --perturb [扰动像素值]</code>；<br>
+           2. 程序会自动匹配数据集图像，解析 GraphML 并生成可视化结果；<br>
+           3. 输出文件为 <code>found_visualized.jpg</code>。</p>
+    </div>
 </body>
 </html>
